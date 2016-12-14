@@ -8,6 +8,6 @@ public class ReDirectIndexEntry extends IndexEntry {
 	}
 	@Override
 	public String toString() {
-		return "REDIRECT\t" + name + " -> " + super.referTo.name;
+		return "+REDIR\t" + name + " -> " + super.referTo.name;
 	}
 }

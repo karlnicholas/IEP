@@ -61,7 +61,7 @@ public class ReadIndex {
 					
 				} else {
 					// do subentries
-					ArrayList<DirectIndexEntry> subEntries = new ArrayList<DirectIndexEntry>();
+					ArrayList<IndexEntry> subEntries = new ArrayList<IndexEntry>();
 					for ( Element subEl: element.children().select("a, li") ) {
 						if ( subEl.tag().getName().equals("li")) {
 							Elements sublink = subEl.getElementsByTag("a");
@@ -75,8 +75,15 @@ public class ReadIndex {
 								if ( subtext.contains("(") ) {
 									subauthor = subtext.substring(subtext.indexOf("(")+1).replace(")", "");
 								}
-								DirectIndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
-								subEntries.add(subEntry);
+								if ( subtext.contains("— see")) {
+									subtext = subEl.text();
+									subname = subtext.substring(0, subtext.indexOf("— see")).trim();
+									IndexEntry indexEntry = new ReDirectIndexEntry(subreferTo, subname);
+									subEntries.add(indexEntry);
+								} else {
+									IndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
+									subEntries.add(subEntry);
+								}
 							}
 						}
 					}
