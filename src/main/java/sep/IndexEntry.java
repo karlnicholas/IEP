@@ -7,7 +7,7 @@ public abstract class IndexEntry {
 		this.referTo = referTo;
 	}
 	public String toString() {
-		return referTo.name;
+		return referTo.toString();
 		
 	}
 }

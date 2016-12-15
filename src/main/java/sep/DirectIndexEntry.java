@@ -18,18 +18,18 @@ public class DirectIndexEntry extends IndexEntry {
 		sb.append(super.toString());
 		sb.append("\t\t");
 		sb.append(author==null?"****":author);
-		if ( subEntries.size() > 0 ) {
+		if ( subEntries != null && subEntries.size() > 0 ) {
 			for ( IndexEntry entry: subEntries) {
 				if ( entry instanceof DirectIndexEntry ) {
 					sb.append("\n\tSUBDIRECT\t");
-					sb.append(entry.referTo.name);
+					sb.append(entry.referTo);
 					sb.append("\t\t");
 					sb.append(((DirectIndexEntry)entry).author==null?"****":((DirectIndexEntry)entry).author);
 				} else if ( entry instanceof ReDirectIndexEntry ) {
 					sb.append("\n\t+SUBREDIR\t");
 					sb.append(((ReDirectIndexEntry)entry).name);
 					sb.append(" -> ");
-					sb.append(entry.referTo.name);
+					sb.append(entry.referTo);
 					
 				}
 			}

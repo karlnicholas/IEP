@@ -24,7 +24,7 @@ public class ReadIndex {
 		char c = 'a';
 		char found = '0';
 		ArrayList<IndexEntry> indexEntries = null;
-		Map<Character, ArrayList<IndexEntry>> index = new HashMap<Character, ArrayList<IndexEntry>>(); 
+		Map<Character, ArrayList<IndexEntry>> index = new HashMap<Character, ArrayList<IndexEntry>>();
 		for ( Element element: content.select("a, li") ) {
 			if ( element.id().equals(Character.toString(c))) {
 				if ( indexEntries != null ) {
@@ -43,9 +43,11 @@ public class ReadIndex {
 					referTo = new ReferTo(name, null);
 				} else {
 					Element a = link.get(0);
-					String url = a.absUrl("href");
+//					String url = a.absUrl("href");
+					String url = a.attr("href");
 					name = a.text();
-					referTo = new ReferTo(name, new URL(url) );
+//					referTo = new ReferTo(name, new URL(url) );
+					referTo = new ReferTo(name, url );
 				}
 				String text = element.ownText();
 				String author = null;
@@ -67,9 +69,11 @@ public class ReadIndex {
 							Elements sublink = subEl.getElementsByTag("a");
 							if ( sublink.size() > 0 ) {
 								Element suba = sublink.get(0);
-								String suburl = suba.absUrl("href");
+//								String suburl = suba.absUrl("href");
+								String suburl = suba.attr("href");
 								String subname = suba.text();
-								ReferTo subreferTo = new ReferTo(subname, new URL(suburl) );
+//								ReferTo subreferTo = new ReferTo(subname, new URL(suburl) );
+								ReferTo subreferTo = new ReferTo(subname, suburl );
 								String subtext = subEl.ownText();
 								String subauthor = null;
 								if ( subtext.contains("(") ) {
