@@ -60,49 +60,49 @@ public class ReadIndex {
 				if ( text.contains("(") ) {
 					author = text.substring(text.indexOf("(")+1).replace(")", "");
 				}
+				// do subentries
+				ArrayList<IndexEntry> subEntries = new ArrayList<IndexEntry>();
+				for ( Element subEl: element.children().select("a, li") ) {
+					if ( subEl.tag().getName().equals("li")) {
+						Elements sublink = subEl.getElementsByTag("a");
+						if ( sublink.size() > 0 ) {
+							Element suba = sublink.get(0);
+//							String suburl = suba.absUrl("href");
+							String suburl = suba.attr("href");
+							String subname = suba.text();
+//							ReferTo subreferTo = new ReferTo(subname, new URL(suburl) );
+							ReferTo subreferTo = new ReferTo(subname, suburl );
+							String subtext = subEl.ownText();
+							String subauthor = null;
+							if ( subtext.contains("(") ) {
+								subauthor = subtext.substring(subtext.indexOf("(")+1).replace(")", "");
+							}
+							if ( subtext.contains("— see")) {
+								subtext = subEl.text();
+								subname = subtext.substring(0, subtext.indexOf("— see")).trim();
+								IndexEntry indexEntry = new ReDirectIndexEntry(subreferTo, subname, null);
+								subEntries.add(indexEntry);
+								// manage url's
+								addReDirect(subreferTo);
+							} else {
+								IndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
+								subEntries.add(subEntry);
+								// manage url's
+								addDirect(subreferTo);
+							}
+						}
+					}
+				}
 				if ( text.contains("— see")) {
 					text = element.text();
 					name = text.substring(0, text.indexOf("— see")).trim();
-					IndexEntry indexEntry = new ReDirectIndexEntry(referTo, name);
+					IndexEntry indexEntry = new ReDirectIndexEntry(referTo, name, subEntries);
 					indexEntries.add(indexEntry);
 					// manage url's
 					addReDirect(referTo);
 					System.out.println(indexEntry);
 					
 				} else {
-					// do subentries
-					ArrayList<IndexEntry> subEntries = new ArrayList<IndexEntry>();
-					for ( Element subEl: element.children().select("a, li") ) {
-						if ( subEl.tag().getName().equals("li")) {
-							Elements sublink = subEl.getElementsByTag("a");
-							if ( sublink.size() > 0 ) {
-								Element suba = sublink.get(0);
-//								String suburl = suba.absUrl("href");
-								String suburl = suba.attr("href");
-								String subname = suba.text();
-//								ReferTo subreferTo = new ReferTo(subname, new URL(suburl) );
-								ReferTo subreferTo = new ReferTo(subname, suburl );
-								String subtext = subEl.ownText();
-								String subauthor = null;
-								if ( subtext.contains("(") ) {
-									subauthor = subtext.substring(subtext.indexOf("(")+1).replace(")", "");
-								}
-								if ( subtext.contains("— see")) {
-									subtext = subEl.text();
-									subname = subtext.substring(0, subtext.indexOf("— see")).trim();
-									IndexEntry indexEntry = new ReDirectIndexEntry(subreferTo, subname);
-									subEntries.add(indexEntry);
-									// manage url's
-									addReDirect(subreferTo);
-								} else {
-									IndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
-									subEntries.add(subEntry);
-									addDirect(subreferTo);
-								}
-							}
-						}
-					}
-					
 					//
 					IndexEntry indexEntry = new DirectIndexEntry(referTo, author, subEntries);
 					indexEntries.add(indexEntry);
@@ -118,6 +118,13 @@ public class ReadIndex {
 		}
 		System.out.println("directs = " + directs.size() + ", and " + directDup + " dups");
 		System.out.println("reDirects = " + reDirects.size() + ", and " + reDirectDup + " dups");
+/*		
+		for ( String key: reDirects.keySet() ) {
+			if ( !directs.containsKey(key)) {
+				System.out.println("No direct for redirect: " + reDirects.get(key));
+			}
+		}
+*/		
 	}
 	private void addDirect(ReferTo referTo) {
 		if ( referTo.url == null ) return;
