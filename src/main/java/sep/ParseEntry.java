@@ -1,7 +1,9 @@
 package sep;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +15,24 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class ParseEntry {
+	int count = 0;
 	public static void main(String[] args) throws IOException {
-		new ParseEntry().run("entries/abduction/", new File("c:/users/karln/downloads/Abduction (Stanford Encyclopedia of Philosophy_Fall 2016 Edition).html"));
+		new ParseEntry().run();
 	}
-	private void run(String url, File file) throws IOException {
-		Document doc = Jsoup.parse(file, null);
-		doc.setBaseUri("https://plato.stanford.edu/archives/fall2016/"+url);
+	private void run() throws IOException {
+		Files.list(Paths.get("c:/users/karln/sep/entries/")).forEach( (file) -> {
+			try {
+				parseEntry( "entries/" + file.getFileName().toString() + "/", file );
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+	}
+	private void parseEntry(String url, Path path) throws IOException {
+		Document doc = Jsoup.parse(path.toFile(), null);
+		if ( count++ % 100 == 0 ) System.out.println(count);
+//		doc.setBaseUri("https://plato.stanford.edu/archives/fall2016/"+url);
 
 		Element elPreamble = doc.getElementById("preamble");
 		Element elTocs = doc.getElementById("toc");
@@ -47,8 +61,12 @@ public class ParseEntry {
 			String tag = els.tag().toString().toLowerCase();
 			if ( tag.equals("h2") || tag.equals("h3") ) {
 				if ( text != null ) texts.put(url, text);
-				Element a = els.child(0);
-				url = a.attr("name");
+				Elements a = els.select("a");
+				if ( a.size() == 0 ) {
+					url = els.attr("id");
+				} else {
+					url = a.get(0).attr("name");
+				}
 				text = new ArrayList<String>();
 				continue;
 			}
@@ -68,12 +86,16 @@ public class ParseEntry {
 			if ( elSubTocs != null ) {
 				subEntries = new ArrayList<TOCEntry>();
 				for ( Element elSubEntry: elSubTocs) {
-					Element as = elSubEntry.child(0);
-					subEntries.add(new TOCEntry(as.attr("href"), as.ownText(), null));
+					Elements as = elSubEntry.select("a");
+					if ( as.size() != 0 ) {
+						subEntries.add(new TOCEntry(as.get(0).attr("href"), as.get(0).ownText(), null));
+					}
 				}
 			}
-			Element a = elEntry.child(0);
-			toc.addEntry(new TOCEntry(a.attr("href"), a.ownText(), subEntries) );
+			Elements as = elEntry.select("a");
+			if ( as.size() != 0 ) {
+				toc.addEntry(new TOCEntry(as.get(0).attr("href"), as.get(0).ownText(), subEntries) );
+			}
 		}
 		return toc;
 	}

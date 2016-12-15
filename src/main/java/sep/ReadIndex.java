@@ -2,10 +2,19 @@ package sep;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -124,6 +133,26 @@ public class ReadIndex {
 			}
 		}
 */		
+//		ripSite();
+	}
+	private void ripSite() throws ClientProtocolException, IOException {
+		try ( CloseableHttpClient httpclient = HttpClients.createDefault() ) {
+			int count = 0;
+			for ( String url: directs.keySet() ) {
+				if ( count++ % 100 == 0 ) System.out.println(count);
+				HttpGet httpGet = new HttpGet("https://plato.stanford.edu/archives/fall2016/"+url);
+				OutputStream fos = Files.newOutputStream(Paths.get("c:/users/karln/sep/" + url));
+				CloseableHttpResponse response = httpclient.execute(httpGet);
+				try {
+				    HttpEntity entity = response.getEntity();
+				    entity.writeTo(fos);
+				} finally {
+				    response.close();
+				}
+				fos.close();
+			}
+			httpclient.close();
+		}
 	}
 	private void addDirect(ReferTo referTo) {
 		if ( referTo.url == null ) return;
