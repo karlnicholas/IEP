@@ -14,6 +14,11 @@ import org.jsoup.select.Elements;
 
 public class ReadIndex {
 	
+	Map<String, ReferTo> directs = new HashMap<String, ReferTo>();
+	Map<String, ReferTo> reDirects = new HashMap<String, ReferTo>();
+	int directDup = 0;
+	int reDirectDup = 0;
+
 	public static void main(String[] args) throws IOException {
 		new ReadIndex().run();
 	}
@@ -25,6 +30,7 @@ public class ReadIndex {
 		char found = '0';
 		ArrayList<IndexEntry> indexEntries = null;
 		Map<Character, ArrayList<IndexEntry>> index = new HashMap<Character, ArrayList<IndexEntry>>();
+		
 		for ( Element element: content.select("a, li") ) {
 			if ( element.id().equals(Character.toString(c))) {
 				if ( indexEntries != null ) {
@@ -59,6 +65,8 @@ public class ReadIndex {
 					name = text.substring(0, text.indexOf("— see")).trim();
 					IndexEntry indexEntry = new ReDirectIndexEntry(referTo, name);
 					indexEntries.add(indexEntry);
+					// manage url's
+					addReDirect(referTo);
 					System.out.println(indexEntry);
 					
 				} else {
@@ -84,9 +92,12 @@ public class ReadIndex {
 									subname = subtext.substring(0, subtext.indexOf("— see")).trim();
 									IndexEntry indexEntry = new ReDirectIndexEntry(subreferTo, subname);
 									subEntries.add(indexEntry);
+									// manage url's
+									addReDirect(subreferTo);
 								} else {
 									IndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
 									subEntries.add(subEntry);
+									addDirect(subreferTo);
 								}
 							}
 						}
@@ -95,6 +106,8 @@ public class ReadIndex {
 					//
 					IndexEntry indexEntry = new DirectIndexEntry(referTo, author, subEntries);
 					indexEntries.add(indexEntry);
+					// manage url's
+					addDirect(referTo);
 					System.out.println(indexEntry);
 				}
 			}
@@ -102,6 +115,24 @@ public class ReadIndex {
 		index.put(found, indexEntries);
 		for ( Character key: index.keySet() ) {
 			System.out.println(key + " = " + index.get(key).size());
+		}
+		System.out.println("directs = " + directs.size() + ", and " + directDup + " dups");
+		System.out.println("reDirects = " + reDirects.size() + ", and " + reDirectDup + " dups");
+	}
+	private void addDirect(ReferTo referTo) {
+		if ( referTo.url == null ) return;
+		if ( directs.get(referTo.url) != null ) {
+			directDup++;			
+		} else {
+			directs.put(referTo.url, referTo);
+		}
+	}
+	private void addReDirect(ReferTo referTo) {
+		if ( referTo.url == null ) return;
+		if ( reDirects.get(referTo.url) != null ) {
+			reDirectDup++;			
+		} else {
+			reDirects.put(referTo.url, referTo);
 		}
 	}
 
