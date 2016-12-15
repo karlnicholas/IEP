@@ -2,7 +2,6 @@ package sep;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class ReadIndex {
 		new ReadIndex().run();
 	}
 	private void run() throws IOException {
-		Document doc = Jsoup.parse(new File("c:/users/karln/downloads/view-source_https___plato.stanford.edu_archives_fall2016_contents.html"), null);
+		Document doc = Jsoup.parse(new File("c:/users/karln/downloads/Table of Contents (Stanford Encyclopedia of Philosophy_Fall 2016 Edition).html"), null);
 		doc.setBaseUri("https://plato.stanford.edu/archives/fall2016/");
 		Element content = doc.getElementById("content");
 		char c = 'a';
