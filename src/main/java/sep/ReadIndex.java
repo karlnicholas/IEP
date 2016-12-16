@@ -108,7 +108,7 @@ public class ReadIndex {
 					indexEntries.add(indexEntry);
 					// manage url's
 					addReDirect(referTo);
-					System.out.println(indexEntry);
+//					System.out.println(indexEntry);
 					
 				} else {
 					//
@@ -116,7 +116,7 @@ public class ReadIndex {
 					indexEntries.add(indexEntry);
 					// manage url's
 					addDirect(referTo);
-					System.out.println(indexEntry);
+//					System.out.println(indexEntry);
 				}
 			}
 		}
@@ -134,12 +134,18 @@ public class ReadIndex {
 		}
 */		
 //		ripSite();
+		int count = 0;
+		EntryParser entryParser = new EntryParser();
+		for ( String url: directs.keySet() ) {
+			if ( ++count%500 == 0 ) System.out.println(count);
+			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
+		}
 	}
 	private void ripSite() throws ClientProtocolException, IOException {
 		try ( CloseableHttpClient httpclient = HttpClients.createDefault() ) {
 			int count = 0;
 			for ( String url: directs.keySet() ) {
-				if ( count++ % 100 == 0 ) System.out.println(count);
+				if ( ++count%100 == 0 ) System.out.println(count);
 				HttpGet httpGet = new HttpGet("https://plato.stanford.edu/archives/fall2016/"+url);
 				OutputStream fos = Files.newOutputStream(Paths.get("c:/users/karln/sep/" + url));
 				CloseableHttpResponse response = httpclient.execute(httpGet);

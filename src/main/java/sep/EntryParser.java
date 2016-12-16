@@ -1,9 +1,7 @@
 package sep;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,44 +12,26 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class ParseEntry {
-	int count = 0;
-	public static void main(String[] args) throws IOException {
-		new ParseEntry().run();
-	}
-	private void run() throws IOException {
-		Files.list(Paths.get("c:/users/karln/sep/entries/")).forEach( (file) -> {
-			try {
-				parseEntry( "entries/" + file.getFileName().toString() + "/", file );
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
-	}
-	private void parseEntry(String url, Path path) throws IOException {
+public class EntryParser {
+	String preamble;
+	Map<String, List<String>> texts;
+
+	public String parseEntry(String url, Path path) throws IOException {
 		Document doc = Jsoup.parse(path.toFile(), null);
-		if ( count++ % 100 == 0 ) System.out.println(count);
 //		doc.setBaseUri("https://plato.stanford.edu/archives/fall2016/"+url);
 
 		Element elPreamble = doc.getElementById("preamble");
-		Element elTocs = doc.getElementById("toc");
-		Element elMainText = doc.getElementById("main-text");
+		preamble = elPreamble.html();
+//		Element elTocs = doc.getElementById("toc");
+//		Element elMainText = doc.getElementById("main-text");
 //		Element elBibliography = doc.getElementById("bibliography");
-		Element elRelatedEntries = doc.getElementById("related-entries");
+//		Element elRelatedEntries = doc.getElementById("related-entries");
 //		Element elArticleCopyright = doc.getElementById("article-copyright");
 		
-		TOC toc = parseToc(elTocs);
-		Map<String, List<String>> texts = splitMainText(elMainText);
-		trimTocTexts(toc, texts);
-		
-	}
-	private void trimTocTexts(TOC toc, Map<String, List<String>> texts) {
-		for ( String key: toc.getUrls()) {
-			if ( texts.get(key.replace("#",  "")) == null ) {
-				toc.removeEntry(key);
-			}
-		}
+//		TOC toc = parseToc(elTocs);
+//		texts = splitMainText(elMainText);
+//		trimTocTexts(toc, texts);
+		return elPreamble.select("p").get(0).text();
 	}
 	private Map<String, List<String>> splitMainText(Element elMainText) {
 		Map<String, List<String>> texts = new HashMap<String, List<String>>(); 
@@ -77,7 +57,14 @@ public class ParseEntry {
 		if ( text != null ) texts.put(url, text);
 		return texts;
 	}
-	
+/*	
+	private void trimTocTexts(TOC toc, Map<String, List<String>> texts) {
+		for ( String key: toc.getUrls()) {
+			if ( texts.get(key.replace("#",  "")) == null ) {
+				toc.removeEntry(key);
+			}
+		}
+	}
 	private TOC parseToc(Element elTocs) {
 		TOC toc = new TOC();
 		for ( Element elEntry: elTocs.select("li")) {
@@ -99,5 +86,5 @@ public class ParseEntry {
 		}
 		return toc;
 	}
-
+*/
 }
