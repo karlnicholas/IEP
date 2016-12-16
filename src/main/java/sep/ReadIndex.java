@@ -134,12 +134,53 @@ public class ReadIndex {
 		}
 */		
 //		ripSite();
+/*		
 		int count = 0;
 		EntryParser entryParser = new EntryParser();
 		for ( String url: directs.keySet() ) {
 			if ( ++count%500 == 0 ) System.out.println(count);
 			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
 		}
+*/
+		Map<String, String> subjects = new HashMap<String, String>();
+		for ( Character key: index.keySet() ) {
+			for ( IndexEntry entry: index.get(key) ) {
+				String name = adjustName(entry.referTo.name);
+				if ( entry.referTo.url != null )
+					subjects.put( name, entry.referTo.url);
+				if ( entry.subEntries != null ) {
+					for ( IndexEntry subEntry: entry.subEntries ) {
+						String subName = adjustName(subEntry.referTo.name);
+						if ( subEntry.referTo.url != null )
+							subjects.put( name+": "+subName, subEntry.referTo.url);
+					}
+				}
+			}
+		}
+		System.out.println(subjects.size());
+		System.out.println(subjects.keySet());
+		for ( String key: subjects.keySet()) {
+			if ( key.contains(":")) {
+				System.out.println(key);
+			}
+		}
+	}
+	private String adjustName(String name) {
+		String colon = null;
+		if ( name.contains(":")) {
+			int idx = name.indexOf(':');
+			String first = name.substring(0, idx);
+			colon = name.substring(idx+1).trim();
+			name = first;
+		}
+		if ( name.contains(",")) {
+			int idx = name.indexOf(',');
+			String first = name.substring(0, idx);
+			name = name.substring(idx + 1).trim() + ' ' + first.trim();
+		}
+		if ( colon != null )
+			name = name + ": " + colon;
+		return name;
 	}
 	private void ripSite() throws ClientProtocolException, IOException {
 		try ( CloseableHttpClient httpclient = HttpClients.createDefault() ) {
