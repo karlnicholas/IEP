@@ -20,6 +20,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import lucene.IndexFiles;
+
 public class ReadIndex {
 	
 	Map<String, ReferTo> directs = new HashMap<String, ReferTo>();
@@ -159,11 +161,13 @@ public class ReadIndex {
 		}
 		System.out.println(subjects.size());
 		System.out.println(subjects.keySet());
+
+		// do lucene work
+		IndexFiles indexFiles = new IndexFiles();
 		for ( String key: subjects.keySet()) {
-			if ( key.contains(":")) {
-				System.out.println(key);
-			}
+			indexFiles.indexEntry(key, subjects.get(key));
 		}
+		indexFiles.close();
 	}
 	private String adjustName(String name) {
 		String colon = null;

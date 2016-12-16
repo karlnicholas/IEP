@@ -1,7 +1,5 @@
 package sep;
 
-import java.net.URL;
-
 public class ReferTo {
 	String name;
 	String url;
