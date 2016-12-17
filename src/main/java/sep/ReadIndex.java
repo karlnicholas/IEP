@@ -136,36 +136,39 @@ public class ReadIndex {
 		}
 */		
 //		ripSite();
-/*		
+		
 		int count = 0;
 		EntryParser entryParser = new EntryParser();
-		for ( String url: directs.keySet() ) {
-			if ( ++count%500 == 0 ) System.out.println(count);
-			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
-		}
-*/
+//		for ( String url: directs.keySet() ) {
+//			if ( ++count%500 == 0 ) System.out.println(count);
+//			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
+//		}
+
+		IndexFiles indexFiles = new IndexFiles();
 		Map<String, String> subjects = new HashMap<String, String>();
 		for ( Character key: index.keySet() ) {
 			for ( IndexEntry entry: index.get(key) ) {
 				String name = adjustName(entry.referTo.name);
-				if ( entry.referTo.url != null )
-					subjects.put( name, entry.referTo.url);
+				if ( entry.referTo.url != null ) {
+					if ( subjects.get(name) == null ) {
+						String preamble = entryParser.parseEntry(entry.referTo.url, Paths.get("c:/users/karln/sep/"+entry.referTo.url));
+						subjects.put( name, entry.referTo.url);
+						indexFiles.indexEntry(name, entry.referTo.url, preamble);
+					}
+				}
 				if ( entry.subEntries != null ) {
 					for ( IndexEntry subEntry: entry.subEntries ) {
 						String subName = adjustName(subEntry.referTo.name);
-						if ( subEntry.referTo.url != null )
-							subjects.put( name+": "+subName, subEntry.referTo.url);
+						if ( subEntry.referTo.url != null ) {
+							if ( subjects.get(name) == null ) {
+								String preamble = entryParser.parseEntry(subEntry.referTo.url, Paths.get("c:/users/karln/sep/"+subEntry.referTo.url));
+								subjects.put( name+": "+subName, subEntry.referTo.url);
+								indexFiles.indexEntry(name+": "+subName, subEntry.referTo.url, preamble);
+							}
+						}
 					}
 				}
 			}
-		}
-		System.out.println(subjects.size());
-		System.out.println(subjects.keySet());
-
-		// do lucene work
-		IndexFiles indexFiles = new IndexFiles();
-		for ( String key: subjects.keySet()) {
-			indexFiles.indexEntry(key, subjects.get(key));
 		}
 		indexFiles.close();
 	}

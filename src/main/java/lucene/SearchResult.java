@@ -3,10 +3,12 @@ package lucene;
 import sep.ReferTo;
 
 public class SearchResult extends ReferTo {
-	float score;
-	public SearchResult(String name, String url, float score) {
+	public float score;
+	public String preamble;
+	public SearchResult(String name, String url, String preamble, float score) {
 		super(name, url);
 		this.score = score;
+		this.preamble = preamble;
 	}
 	@Override
 	public String toString() {

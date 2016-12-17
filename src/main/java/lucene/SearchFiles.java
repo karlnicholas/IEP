@@ -19,6 +19,7 @@ package lucene;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -94,17 +95,31 @@ public class SearchFiles {
 		hits = searcher.search(query, numTotalHits).scoreDocs;
 
 		end = Math.min(hits.length, start + hitsPerPage);
-
+		float tScore = hits[0].score;
+		int tCount = 0;
+		for ( int i=1; i < end; ++i ) {
+			if ( Float.compare(hits[i].score, tScore) == 0 ) {
+				tCount = i;
+			}
+		}
 		for (int i = start; i < end; i++) {
 
 			Document doc = searcher.doc(hits[i].doc);
 			String name = doc.get("name");
 			if (name != null) {
 				String url = doc.get("url");
-				
-				searchResults.add(new SearchResult(name, url, hits[i].score));
+				String preamble = null;
+				if ( i <= tCount ) {
+					preamble = doc.get("preamble");
+				}
+				searchResults.add(new SearchResult(name, url, preamble, hits[i].score));
+				if ( i == tCount ) {
+					Collections.shuffle(searchResults);
+				}
 			}
 		}
+
+//		searchResults.get(0).preamble = searcher.doc(hits[0].doc);
 		return searchResults;
 	}
 }

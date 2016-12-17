@@ -80,7 +80,7 @@ public class IndexFiles {
 
 	}
 
-	public void indexEntry(String name, String url) throws IOException {
+	public void indexEntry(String name, String url, String preamble) throws IOException {
 		// make a new, empty document
 		Document doc = new Document();
 
@@ -89,6 +89,9 @@ public class IndexFiles {
 
 		Field urlField = new StringField("url", url, Field.Store.YES);
 		doc.add(urlField);
+
+		Field preambleField = new StringField("preamble", preamble, Field.Store.YES);
+		doc.add(preambleField);
 
 		writer.addDocument(doc);
 	}

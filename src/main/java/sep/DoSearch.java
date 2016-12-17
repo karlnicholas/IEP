@@ -15,16 +15,17 @@ public class DoSearch {
 	public void doSearch() {
 		try {
 			SearchFiles searchFiles = new SearchFiles();
-			List<SearchResult> searchResults = searchFiles.query("Plato");
+			List<SearchResult> searchResults = searchFiles.query("self");
 			if ( searchResults.size() > 0 ) {
 				System.out.println("Found results: " + searchResults.size());
 				for ( SearchResult searchResult: searchResults ) {
 					System.out.println(searchResult);
 				}
+				System.out.println("Best result\n"+searchResults.get(0).preamble);
 			}
 			searchFiles.close();
 		} catch (ParseException | IOException e) {
-			// TODO Auto-generated catch block
+			//
 			e.printStackTrace();
 		}
 	}
