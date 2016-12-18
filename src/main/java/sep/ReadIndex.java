@@ -1,5 +1,6 @@
 package sep;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -231,11 +232,14 @@ public class ReadIndex {
 				}
 			}
 		}
+		// hmmm
+		String turl = subjects.remove("rights human");
+		subjects.put("human rights", turl);
 		System.out.println("Subjects.size = " + subjects.size());
 		for ( String key: subjects.keySet() ) {
 			System.out.println(key);
 		}
-
+/*
 		count = 0;
 		IndexFiles indexFiles = new IndexFiles();
 		for ( String key: subjects.keySet() ) {
@@ -245,7 +249,13 @@ public class ReadIndex {
 			indexFiles.indexEntry(key, url, preamble);
 		}
 		indexFiles.close();
-
+*/
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get("c:/users/karln/workspace/SEP/LIST_OF_SEARCHES"));
+		for ( String key: subjects.keySet() ) {
+			writer.write(key);
+			writer.newLine();
+		}
+		writer.close();
 	}
 	private String clipRedirect(String name) {
 		String colon = null;

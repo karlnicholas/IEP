@@ -15,7 +15,7 @@ public class DoSearch {
 	public void doSearch() {
 		try {
 			SearchFiles searchFiles = new SearchFiles();
-			List<SearchResult> searchResults = searchFiles.query("ethics");
+			List<SearchResult> searchResults = searchFiles.query("theology");
 			if ( searchResults.size() > 0 ) {
 				System.out.println("Found results: " + searchResults.size());
 				for ( SearchResult searchResult: searchResults ) {
