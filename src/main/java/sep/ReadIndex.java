@@ -96,6 +96,7 @@ public class ReadIndex {
 //							ReferTo subreferTo = new ReferTo(subname, new URL(suburl) );
 							ReferTo subreferTo = new ReferTo(subname, suburl );
 							String subtext = subEl.ownText();
+							
 							String subauthor = null;
 							if ( subtext.contains("(") ) {
 								subauthor = subtext.substring(subtext.indexOf("(")+1).replace(")", "");
@@ -246,7 +247,8 @@ public class ReadIndex {
 		indexFiles.close();
 
 	}
-	private String clipRedirect(String name) {		String colon = null;
+	private String clipRedirect(String name) {
+		String colon = null;
 		if ( name.contains(":")) {
 			int idx = name.indexOf(':');
 			String first = name.substring(0, idx);
