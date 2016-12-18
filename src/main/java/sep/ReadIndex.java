@@ -71,7 +71,7 @@ public class ReadIndex {
 					author = text.substring(text.indexOf("(")+1).replace(")", "");
 				}
 				// do subentries
-				ArrayList<IndexEntry> subEntries = new ArrayList<IndexEntry>();
+//				ArrayList<IndexEntry> subEntries = new ArrayList<IndexEntry>();
 				for ( Element subEl: element.children().select("a, li") ) {
 					if ( subEl.tag().getName().equals("li")) {
 						Elements sublink = subEl.getElementsByTag("a");
@@ -80,6 +80,19 @@ public class ReadIndex {
 //							String suburl = suba.absUrl("href");
 							String suburl = suba.attr("href");
 							String subname = suba.text();
+							if ( !subname.contains(name)) {
+								String parent = null;
+								if ( subname.contains(":") ) {
+									parent = subname.substring(subname.indexOf(':')+1);
+								}
+								if ( parent == null || !subname.contains(parent)) {									
+									if ( name.contains(",")) {
+										subname = subname + " of " + adjustName(name);
+									} else {
+										subname = adjustName(name) + " " + subname;
+									}
+								}
+							}
 //							ReferTo subreferTo = new ReferTo(subname, new URL(suburl) );
 							ReferTo subreferTo = new ReferTo(subname, suburl );
 							String subtext = subEl.ownText();
@@ -88,34 +101,35 @@ public class ReadIndex {
 								subauthor = subtext.substring(subtext.indexOf("(")+1).replace(")", "");
 							}
 							if ( subtext.contains("— see")) {
-								subtext = subEl.text();
-								subname = subtext.substring(0, subtext.indexOf("— see")).trim();
-								IndexEntry indexEntry = new ReDirectIndexEntry(subreferTo, subname, null);
-								subEntries.add(indexEntry);
+//								subtext = subEl.text();
+//								subname = subtext.substring(0, subtext.indexOf("— see")).trim();
+//								IndexEntry indexEntry = new ReDirectIndexEntry(subreferTo, subname, null);
+//								subEntries.add(indexEntry);
 								// manage url's
 								addReDirect(subreferTo);
 							} else {
-								IndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
-								subEntries.add(subEntry);
+//								IndexEntry subEntry = new DirectIndexEntry(subreferTo, subauthor, null);
+//								subEntries.add(subEntry);
 								// manage url's
 								addDirect(subreferTo);
 							}
 						}
 					}
 				}
+
 				if ( text.contains("— see")) {
 					text = element.text();
 					name = text.substring(0, text.indexOf("— see")).trim();
-					IndexEntry indexEntry = new ReDirectIndexEntry(referTo, name, subEntries);
-					indexEntries.add(indexEntry);
+//					IndexEntry indexEntry = new ReDirectIndexEntry(referTo, name, subEntries);
+//					indexEntries.add(indexEntry);
 					// manage url's
 					addReDirect(referTo);
 //					System.out.println(indexEntry);
 					
 				} else {
 					//
-					IndexEntry indexEntry = new DirectIndexEntry(referTo, author, subEntries);
-					indexEntries.add(indexEntry);
+//					IndexEntry indexEntry = new DirectIndexEntry(referTo, author, subEntries);
+//					indexEntries.add(indexEntry);
 					// manage url's
 					addDirect(referTo);
 //					System.out.println(indexEntry);
@@ -143,7 +157,7 @@ public class ReadIndex {
 //			if ( ++count%500 == 0 ) System.out.println(count);
 //			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
 //		}
-
+/*
 		IndexFiles indexFiles = new IndexFiles();
 		Map<String, String> subjects = new HashMap<String, String>();
 		for ( Character key: index.keySet() ) {
@@ -171,9 +185,68 @@ public class ReadIndex {
 			}
 		}
 		indexFiles.close();
+*/		
+/*				
+		Map<String, String> subjects = new HashMap<String, String>();
+		for ( Character key: index.keySet() ) {
+			for ( IndexEntry entry: index.get(key) ) {
+				String name = adjustName(entry.referTo.name);
+				if ( entry.referTo.url != null ) {
+					if ( subjects.get(name) == null ) {
+						subjects.put( name, entry.referTo.url);
+					}
+				}
+				if ( entry.subEntries != null ) {
+					for ( IndexEntry subEntry: entry.subEntries ) {
+						String subName = adjustName(subEntry.referTo.name);
+						if ( subEntry.referTo.url != null ) {
+							if ( subjects.get(name) == null ) {
+//								subjects.put( name+": "+subName, subEntry.referTo.url);
+								subjects.put( "parent: "+subName, subEntry.referTo.url);
+							}
+						}
+					}
+				}
+			}
+		}
+*/				
+		Map<String, String> subjects = new HashMap<String, String>();
+		for ( ReferTo key: directs.values() ) {
+			subjects.put(adjustName(key.name), key.url);
+		}
+		for ( ReferTo key: reDirects.values() ) {
+			String rName = clipRedirect(key.name);
+			if ( subjects.get(rName) == null ) {
+				ReferTo rDirect = directs.get(key.url);
+				if ( rDirect == null ) {
+					System.out.println("subject not found: " + rName + ":" + key);
+				} else {
+					subjects.put(rName, key.url);
+				}
+			} else {
+				if ( !subjects.get(rName).equals(key.url) ) {
+					System.out.println("same subject, diff url: " + rName + "==" + subjects.get(rName) + "==" + key.url);
+					subjects.put(rName, key.url);
+				}
+			}
+		}
+		System.out.println("Subjects.size = " + subjects.size());
+		for ( String key: subjects.keySet() ) {
+			System.out.println(key);
+		}
+
+		count = 0;
+		IndexFiles indexFiles = new IndexFiles();
+		for ( String key: subjects.keySet() ) {
+			if ( ++count%100 == 0 ) System.out.println(count);
+			String url = subjects.get(key);
+			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
+			indexFiles.indexEntry(key, url, preamble);
+		}
+		indexFiles.close();
+
 	}
-	private String adjustName(String name) {
-		String colon = null;
+	private String clipRedirect(String name) {		String colon = null;
 		if ( name.contains(":")) {
 			int idx = name.indexOf(':');
 			String first = name.substring(0, idx);
@@ -185,8 +258,36 @@ public class ReadIndex {
 			String first = name.substring(0, idx);
 			name = name.substring(idx + 1).trim() + ' ' + first.trim();
 		}
-		if ( colon != null )
-			name = name + ": " + colon;
+		if ( colon != null ) {
+			if ( colon.contains(" of") ) {
+				name = colon + ' ' + name ;
+			} else if ( colon.contains("and ")  ) {
+				name = name + ' ' + colon;
+			} else if ( !colon.contains(" ")  ){
+				name = name+ ' ' + colon ;
+			} else {
+				name = colon + ' ' + name ;
+			}
+		}
+		return name;
+	}
+	private String adjustName(String name) {
+/*		
+		String colon = null;
+		if ( name.contains(":")) {
+			int idx = name.indexOf(':');
+			String first = name.substring(0, idx);
+			colon = name.substring(idx+1).trim();
+			name = first;
+		}
+*/		
+		if ( name.contains(",")) {
+			int idx = name.indexOf(',');
+			String first = name.substring(0, idx);
+			name = name.substring(idx + 1).trim() + ' ' + first.trim();
+		}
+//		if ( colon != null )
+//			name = name + ": " + colon;
 		return name;
 	}
 	private void ripSite() throws ClientProtocolException, IOException {
