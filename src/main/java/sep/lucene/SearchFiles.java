@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package lucene;
+package sep.lucene;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,15 +45,15 @@ public class SearchFiles {
 
 	public SearchFiles() {
 		try {
-			reader = DirectoryReader.open(FSDirectory.open(Paths.get(IndexFiles.indexPath)));
+			reader =  DirectoryReader.open(FSDirectory.open(Paths.get(SearchFiles.class.getResource("/index/").toURI())));
 			searcher = new IndexSearcher(reader);
 			analyzer = new StandardAnalyzer();
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public List<SearchResult> query(String value) throws ParseException, IOException {
+	public synchronized List<SearchResult> query(String value) throws ParseException, IOException {
 
 		QueryParser parser = new QueryParser("name", analyzer);
 		Query query = parser.parse(value);

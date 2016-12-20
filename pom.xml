@@ -4,7 +4,6 @@
   <artifactId>SEP</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -41,6 +40,11 @@
 	    <groupId>org.apache.lucene</groupId>
 	    <artifactId>lucene-queryparser</artifactId>
 	    <version>6.3.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-lang3</artifactId>
+	    <version>3.5</version>
 	</dependency>
   </dependencies>
 </project>

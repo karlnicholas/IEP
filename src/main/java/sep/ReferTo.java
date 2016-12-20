@@ -1,8 +1,8 @@
 package sep;
 
 public class ReferTo {
-	String name;
-	String url;
+	public String name;
+	public String url;
 //	URL url;
 //	public ReferTo(String name, URL url) {
 	public ReferTo(String name, String url) {

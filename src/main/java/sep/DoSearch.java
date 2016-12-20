@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 
-import lucene.SearchFiles;
-import lucene.SearchResult;
+import sep.lucene.SearchFiles;
+import sep.lucene.SearchResult;
 
 public class DoSearch {
 	public static void main(String[] args) {
@@ -15,7 +15,7 @@ public class DoSearch {
 	public void doSearch() {
 		try {
 			SearchFiles searchFiles = new SearchFiles();
-			List<SearchResult> searchResults = searchFiles.query("theology");
+			List<SearchResult> searchResults = searchFiles.query("virtue");
 			if ( searchResults.size() > 0 ) {
 				System.out.println("Found results: " + searchResults.size());
 				for ( SearchResult searchResult: searchResults ) {

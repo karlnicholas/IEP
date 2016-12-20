@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import lucene.IndexFiles;
+import sep.lucene.IndexFiles;
 
 public class ReadIndex {
 	
@@ -233,13 +234,68 @@ public class ReadIndex {
 			}
 		}
 		// hmmm
+/*		
 		String turl = subjects.remove("rights human");
 		subjects.put("human rights", turl);
 		System.out.println("Subjects.size = " + subjects.size());
 		for ( String key: subjects.keySet() ) {
 			System.out.println(key);
 		}
-/*
+*/
+		Map<String, String> subjects2 = new HashMap<String, String>();
+		for ( String key: subjects.keySet() ) {
+			String sUrl = subjects.get(key);
+			if ( key.contains(" and") ) sUrl = sUrl+"-and";
+			String[] urls = splitUrl(sUrl);
+			String[] keys = key.split(" ");
+			if ( keys.length > urls.length ) {
+				int[] scores = new int[keys.length];
+				int i=0;
+				for ( String str: keys ) {
+					int tscore = 100;
+					for ( String sKey: urls) {
+						int score = org.apache.commons.lang3.StringUtils.getLevenshteinDistance(str, sKey);
+						if ( score < tscore ) tscore = score;
+					}
+					scores[i++] = tscore;
+				}
+				String[] tKeys = Arrays.copyOf(keys, keys.length);
+				// sort
+				for ( i=0; i < scores.length; ++i ) {
+					for ( int j = i+1; j < scores.length; ++j ) {
+						if ( scores[i] > scores[j] ) {
+							int t = scores[i];
+							scores[i] = scores[j];
+							scores[j] = t;
+							String ts = tKeys[i];
+							tKeys[i] = tKeys[j];
+							tKeys[j] = ts;
+						}
+					}
+				}
+				tKeys = Arrays.copyOf(tKeys, urls.length);
+				for ( i=0; i < keys.length; ++i ) {
+					boolean kf = false;
+					for ( String tk: tKeys) {
+						if ( keys[i].equals(tk) ) {
+							kf = true;
+							break;
+						}
+					}
+					if ( ! kf ) keys[i] = null;
+				}
+				String nKey = "";
+				for ( i=0; i < keys.length; ++i ) {
+					if ( keys[i] != null ) {
+						nKey = nKey + keys[i] + " "; 
+//						subjects2.put(keys[i], subjects.get(key));
+					}
+				}
+				subjects2.put(nKey.trim(), subjects.get(key));
+			}
+		}
+
+
 		count = 0;
 		IndexFiles indexFiles = new IndexFiles();
 		for ( String key: subjects.keySet() ) {
@@ -249,13 +305,23 @@ public class ReadIndex {
 			indexFiles.indexEntry(key, url, preamble);
 		}
 		indexFiles.close();
-*/
+
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get("c:/users/karln/workspace/SEP/LIST_OF_SEARCHES"));
-		for ( String key: subjects.keySet() ) {
+		for ( String key: subjects2.keySet() ) {
 			writer.write(key);
+/*			
+			writer.write(" [");
+			writer.write(subjects2.get(key));
+			writer.write("]");
+*/			
 			writer.newLine();
 		}
 		writer.close();
+	}
+	private String[] splitUrl(String url) {
+		url = url.replace("entries/", "");
+		url = url.replace("/", "");
+		return url.split("-");
 	}
 	private String clipRedirect(String name) {
 		String colon = null;

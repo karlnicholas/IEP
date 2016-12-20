@@ -1,4 +1,4 @@
-package lucene;
+package sep.lucene;
 
 import sep.ReferTo;
 
