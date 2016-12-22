@@ -302,6 +302,8 @@ public class ReadIndex {
 			if ( ++count%100 == 0 ) System.out.println(count);
 			String url = subjects.get(key);
 			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
+			if ( key.contains("African Philosophy sage philosophy")) 
+				key = "African Philosophy sage";
 			indexFiles.indexEntry(key, url, preamble);
 		}
 		indexFiles.close();
