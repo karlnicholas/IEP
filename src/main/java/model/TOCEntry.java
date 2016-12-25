@@ -1,4 +1,4 @@
-package sep;
+package model;
 
 import java.util.List;
 

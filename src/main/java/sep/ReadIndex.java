@@ -22,6 +22,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import model.IndexEntry;
+import model.ReferTo;
 import sep.lucene.IndexFiles;
 
 public class ReadIndex {
@@ -35,8 +37,8 @@ public class ReadIndex {
 		new ReadIndex().run();
 	}
 	private void run() throws IOException {
-		Document doc = Jsoup.parse(new File("c:/users/karln/downloads/Table of Contents (Stanford Encyclopedia of Philosophy_Fall 2016 Edition).html"), null);
-		doc.setBaseUri("https://plato.stanford.edu/archives/fall2016/");
+		Document doc = Jsoup.parse(new File("c:/users/karln/downloads/Table of Contents (Stanford Encyclopedia of Philosophy_Winter 2016 Edition).html"), null);
+		doc.setBaseUri("https://plato.stanford.edu/archives/win2016/");
 		Element content = doc.getElementById("content");
 		char c = 'a';
 		char found = '0';
@@ -188,7 +190,7 @@ public class ReadIndex {
 			}
 		}
 		indexFiles.close();
-*/		
+*/
 /*				
 		Map<String, String> subjects = new HashMap<String, String>();
 		for ( Character key: index.keySet() ) {
@@ -212,10 +214,11 @@ public class ReadIndex {
 				}
 			}
 		}
-*/				
-		Map<String, String> subjects = new HashMap<String, String>();
+*/
+
+		Map<String, ReferTo> subjects = new HashMap<String, ReferTo>();
 		for ( ReferTo key: directs.values() ) {
-			subjects.put(adjustName(key.name), key.url);
+			subjects.put(adjustName(key.name), key);
 		}
 		for ( ReferTo key: reDirects.values() ) {
 			String rName = clipRedirect(key.name);
@@ -224,15 +227,16 @@ public class ReadIndex {
 				if ( rDirect == null ) {
 					System.out.println("subject not found: " + rName + ":" + key);
 				} else {
-					subjects.put(rName, key.url);
+					subjects.put(rName, key);
 				}
 			} else {
-				if ( !subjects.get(rName).equals(key.url) ) {
+				if ( !subjects.get(rName).url.equals(key.url) ) {
 					System.out.println("same subject, diff url: " + rName + "==" + subjects.get(rName) + "==" + key.url);
-					subjects.put(rName, key.url);
+					subjects.put(rName, key);
 				}
 			}
 		}
+
 		// hmmm
 /*		
 		String turl = subjects.remove("rights human");
@@ -242,9 +246,11 @@ public class ReadIndex {
 			System.out.println(key);
 		}
 */
-		Map<String, String> subjects2 = new HashMap<String, String>();
+
+		Map<String, ReferTo> subjects2 = new HashMap<String, ReferTo>();
 		for ( String key: subjects.keySet() ) {
-			String sUrl = subjects.get(key);
+			ReferTo referTo = subjects.get(key);
+			String sUrl = referTo.url;
 			if ( key.contains(" and") ) sUrl = sUrl+"-and";
 			String[] urls = splitUrl(sUrl);
 			String[] keys = key.split(" ");
@@ -291,31 +297,54 @@ public class ReadIndex {
 //						subjects2.put(keys[i], subjects.get(key));
 					}
 				}
-				subjects2.put(nKey.trim(), subjects.get(key));
+				// work on nKey "and"
+				nKey = nKey.trim();
+				while ( nKey.startsWith("and ")) {
+					nKey = nKey.substring(4);
+				}
+				while ( nKey.endsWith(" and")) {
+					nKey = nKey.substring(0, nKey.length() - 4);
+				}
+				// work on nKey "and"
+				while ( nKey.startsWith("of ") || nKey.startsWith("in ") || nKey.startsWith("to ")) {
+					nKey = nKey.substring(3);
+				}
+				while ( nKey.endsWith(" of") || nKey.endsWith(" in") || nKey.endsWith(" to")) {
+					nKey = nKey.substring(0, nKey.length() - 3);
+				}
+				while ( nKey.startsWith("and ")) {
+					nKey = nKey.substring(4);
+				}
+				while ( nKey.endsWith(" and")) {
+					nKey = nKey.substring(0, nKey.length() - 4);
+				}
+				nKey = nKey.trim();
+				if ( !nKey.isEmpty() ) {
+					subjects2.put(nKey, subjects.get(key));	
+				}
 			}
 		}
 
 
 		count = 0;
 		IndexFiles indexFiles = new IndexFiles();
-		for ( String key: subjects.keySet() ) {
+		for ( String key: subjects2.keySet() ) {
 			if ( ++count%100 == 0 ) System.out.println(count);
-			String url = subjects.get(key);
-			String preamble = entryParser.parseEntry(url, Paths.get("c:/users/karln/sep/"+url));
+			ReferTo referTo = subjects2.get(key);
+			String preamble = entryParser.parseEntry(referTo.url, Paths.get("c:/users/karln/sep/"+referTo.url));
 			if ( key.contains("African Philosophy sage philosophy")) 
 				key = "African Philosophy sage";
-			indexFiles.indexEntry(key, url, preamble);
+			if ( key.contains("moral particularism and moral")) 
+				key = "moral particularism";
+			
+			indexFiles.indexEntry(key, referTo.url, referTo.name, preamble);
 		}
 		indexFiles.close();
+
 
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get("c:/users/karln/workspace/SEP/LIST_OF_SEARCHES"));
 		for ( String key: subjects2.keySet() ) {
 			writer.write(key);
-/*			
-			writer.write(" [");
-			writer.write(subjects2.get(key));
-			writer.write("]");
-*/			
 			writer.newLine();
 		}
 		writer.close();
@@ -375,7 +404,7 @@ public class ReadIndex {
 			int count = 0;
 			for ( String url: directs.keySet() ) {
 				if ( ++count%100 == 0 ) System.out.println(count);
-				HttpGet httpGet = new HttpGet("https://plato.stanford.edu/archives/fall2016/"+url);
+				HttpGet httpGet = new HttpGet("https://plato.stanford.edu/archives/win2016/"+url);
 				OutputStream fos = Files.newOutputStream(Paths.get("c:/users/karln/sep/" + url));
 				CloseableHttpResponse response = httpclient.execute(httpGet);
 				try {

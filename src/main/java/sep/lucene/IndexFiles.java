@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -45,7 +45,7 @@ public class IndexFiles {
 
 		try {
 			Directory dir = FSDirectory.open(Paths.get(indexPath));
-			Analyzer analyzer = new StandardAnalyzer();
+			Analyzer analyzer = new EnglishAnalyzer();
 			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 	
 			iwc.setOpenMode(OpenMode.CREATE);
@@ -80,7 +80,7 @@ public class IndexFiles {
 
 	}
 
-	public void indexEntry(String name, String url, String preamble) throws IOException {
+	public void indexEntry(String name, String url, String subject, String preamble) throws IOException {
 		// make a new, empty document
 		Document doc = new Document();
 
@@ -89,6 +89,9 @@ public class IndexFiles {
 
 		Field urlField = new StringField("url", url, Field.Store.YES);
 		doc.add(urlField);
+
+		Field subjectField = new StringField("subject", subject, Field.Store.YES);
+		doc.add(subjectField);
 
 		Field preambleField = new StringField("preamble", preamble, Field.Store.YES);
 		doc.add(preambleField);
