@@ -40,21 +40,9 @@ public class ReadIndex {
 		Document doc = Jsoup.parse(new File("c:/users/karln/downloads/Table of Contents (Stanford Encyclopedia of Philosophy_Winter 2016 Edition).html"), null);
 		doc.setBaseUri("https://plato.stanford.edu/archives/win2016/");
 		Element content = doc.getElementById("content");
-		char c = 'a';
-		char found = '0';
-		ArrayList<IndexEntry> indexEntries = null;
-		Map<Character, ArrayList<IndexEntry>> index = new HashMap<Character, ArrayList<IndexEntry>>();
 		
 		for ( Element element: content.select("a, li") ) {
-			if ( element.id().equals(Character.toString(c))) {
-				if ( indexEntries != null ) {
-					index.put(found, indexEntries);
-				}
-				found = c;
-				c++;
-				indexEntries = new ArrayList<IndexEntry>();
-			}
-			if ( found != '0' && element.tag().getName().equals("li") && element.parent().parent() == content) {
+			if ( element.tag().getName().equals("li") && element.parent().parent() == content) {
 				Elements link = element.select(":root > a");
 				String name = null;
 				ReferTo referTo = null;
@@ -75,13 +63,11 @@ public class ReadIndex {
 					author = text.substring(text.indexOf("(")+1).replace(")", "");
 				}
 				// do subentries
-//				ArrayList<IndexEntry> subEntries = new ArrayList<IndexEntry>();
 				for ( Element subEl: element.children().select("a, li") ) {
 					if ( subEl.tag().getName().equals("li")) {
 						Elements sublink = subEl.getElementsByTag("a");
 						if ( sublink.size() > 0 ) {
 							Element suba = sublink.get(0);
-//							String suburl = suba.absUrl("href");
 							String suburl = suba.attr("href");
 							String subname = suba.text();
 							if ( !subname.contains(name)) {
@@ -141,12 +127,9 @@ public class ReadIndex {
 				}
 			}
 		}
-		index.put(found, indexEntries);
-		for ( Character key: index.keySet() ) {
-			System.out.println(key + " = " + index.get(key).size());
-		}
 		System.out.println("directs = " + directs.size() + ", and " + directDup + " dups");
 		System.out.println("reDirects = " + reDirects.size() + ", and " + reDirectDup + " dups");
+		System.out.println(directs.get("zombies"));
 /*		
 		for ( String key: reDirects.keySet() ) {
 			if ( !directs.containsKey(key)) {
@@ -254,7 +237,7 @@ public class ReadIndex {
 			if ( key.contains(" and") ) sUrl = sUrl+"-and";
 			String[] urls = splitUrl(sUrl);
 			String[] keys = key.split(" ");
-			if ( keys.length > urls.length ) {
+			if ( keys.length >= urls.length ) {
 				int[] scores = new int[keys.length];
 				int i=0;
 				for ( String str: keys ) {
@@ -340,7 +323,6 @@ public class ReadIndex {
 			indexFiles.indexEntry(key, referTo.url, referTo.name, preamble);
 		}
 		indexFiles.close();
-
 
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get("c:/users/karln/workspace/SEP/LIST_OF_SEARCHES"));
 		for ( String key: subjects2.keySet() ) {
