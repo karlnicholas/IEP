@@ -61,10 +61,7 @@ public class SearchFiles {
 
 	public synchronized List<SearchResult> query(String value) throws ParseException, IOException {
 
-		QueryParser parser = new QueryParser("name", analyzer);
-		Query query = parser.parse(value);
-
-		return doPagingSearch(query);
+		return doPagingSearch(value);
 
 	}
 
@@ -85,9 +82,13 @@ public class SearchFiles {
 	 * are collected to fill 5 result pages. If the user wants to page beyond
 	 * this limit, then the query is executed another time and all hits are
 	 * collected.
+	 * @throws ParseException 
 	 * 
 	 */
-	private List<SearchResult> doPagingSearch(Query query) throws IOException {
+	private List<SearchResult> doPagingSearch(String value) throws IOException, ParseException {
+		QueryParser parser = new QueryParser("name", analyzer);
+		Query query = parser.parse(value);
+
 		List<SearchResult> searchResults = new ArrayList<SearchResult>();
 		// Collect enough docs to show 5 pages
 		TopDocs results = searcher.search(query, hitsPerPage);
@@ -95,13 +96,25 @@ public class SearchFiles {
 
 		int numTotalHits = results.totalHits;
 
+		// if nothing found?
+		if ( numTotalHits == 0 ) {
+			parser = new QueryParser("preamble", analyzer);
+			query = parser.parse(value);
+			results = searcher.search(query, hitsPerPage);
+			hits = results.scoreDocs;
+
+			numTotalHits = results.totalHits;
+			if ( numTotalHits == 0 ) {
+				return searchResults;
+			}			
+		}
 		int start = 0;
 		int end = Math.min(numTotalHits, hitsPerPage);
-		if ( numTotalHits == 0 ) return searchResults; 
 
 		hits = searcher.search(query, numTotalHits).scoreDocs;
 
 		end = Math.min(hits.length, start + hitsPerPage);
+
 		float tScore = hits[0].score;
 		int tCount = 0;
 		for ( int i=1; i < end; ++i ) {

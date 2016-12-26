@@ -93,7 +93,7 @@ public class IndexFiles {
 		Field subjectField = new StringField("subject", subject, Field.Store.YES);
 		doc.add(subjectField);
 
-		Field preambleField = new StringField("preamble", preamble, Field.Store.YES);
+		Field preambleField = new TextField("preamble", preamble, Field.Store.YES);
 		doc.add(preambleField);
 
 		writer.addDocument(doc);
