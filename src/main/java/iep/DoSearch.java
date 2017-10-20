@@ -1,12 +1,12 @@
-package sep;
+package iep;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 
-import sep.lucene.SearchFiles;
-import sep.lucene.SearchResult;
+import iep.lucene.SearchFiles;
+import iep.lucene.SearchResult;
 
 public class DoSearch {
 	public static void main(String[] args) throws ParseException, IOException {

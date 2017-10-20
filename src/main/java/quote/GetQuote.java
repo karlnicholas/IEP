@@ -8,7 +8,7 @@ import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import sep.lucene.SearchResult;
+import iep.lucene.SearchResult;
 
 public class GetQuote {
 	protected static final String URL_PREFIX = "http://plato.stanford.edu/cgi-bin/encyclopedia/random";
