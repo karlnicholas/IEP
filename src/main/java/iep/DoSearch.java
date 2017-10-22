@@ -14,12 +14,13 @@ public class DoSearch {
 	}
 	public void doSearch() throws ParseException, IOException {
 		SearchFiles searchFiles = new SearchFiles();
-		List<SearchResult> searchResults = searchFiles.query("chomsky");
+		List<SearchResult> searchResults = searchFiles.query("socrates");
 		if ( searchResults.size() > 0 ) {
 			System.out.println("Found results: " + searchResults.size());
 			for ( SearchResult searchResult: searchResults ) {
 				System.out.println(searchResult);
 			}
+			System.out.println("Best result\n"+searchResults.get(0).subject);
 			System.out.println("Best result\n"+searchResults.get(0).preamble);
 		}
 		searchFiles.close();

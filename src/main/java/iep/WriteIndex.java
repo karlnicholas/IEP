@@ -15,13 +15,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class ReadIndex {
-	
+import iep.lucene.IndexFiles;
+
+public class WriteIndex {
+	private IndexFiles indexFiles;
 
 	public static void main(String[] args) throws Exception {
-		new ReadIndex().run();
+		new WriteIndex().run();
 	}
 	private void run() throws Exception {
+		indexFiles = new IndexFiles(); 
 		Path p = Paths.get("c://users/karln/downloads/iep/index.csv");
 		try ( BufferedReader reader = Files.newBufferedReader(p, Charsets.UTF_8)) {
 			CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
@@ -32,6 +35,7 @@ public class ReadIndex {
 				}				
 			}
 		}
+		indexFiles.close();
 	}
 	private void parseDoc(Document doc, CSVRecord record) throws Exception {
 		Elements els = doc.getElementsByClass("entry-content");
@@ -42,8 +46,12 @@ public class ReadIndex {
 			p = els.get(0).getElementsByTag("p").get(ppos++);
 			l = p.text().split(" ").length;
 		} while ( l <= 1 );
-		String title = getTitle(record.get(3));
-		System.out.println(l +":"+title+":"+p.text());
+		String title = getTitle(record.get(2));
+		
+		indexFiles.indexEntry(title, record.get(1), p.text());
+//		if ( title.contains("Ethics")) {
+//			System.out.println(record.get(0)+":"+record.get(1)+":"+record.get(3)+title+":"+p.text());
+//		}
 	}
 	private String getTitle(String title) {
 		String nTitle = title;

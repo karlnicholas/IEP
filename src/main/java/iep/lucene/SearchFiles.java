@@ -27,20 +27,15 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.Fields;
-import org.apache.lucene.index.FilterDirectoryReader.SubReaderWrapper;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.BytesRef;
 
 /** Simple command-line based search demo. */
 public class SearchFiles {
@@ -86,7 +81,7 @@ public class SearchFiles {
 	 * 
 	 */
 	private List<SearchResult> doPagingSearch(String value) throws IOException, ParseException {
-		QueryParser parser = new QueryParser("name", analyzer);
+		QueryParser parser = new QueryParser("subject", analyzer);
 		Query query = parser.parse(value);
 
 		List<SearchResult> searchResults = new ArrayList<SearchResult>();
@@ -125,15 +120,14 @@ public class SearchFiles {
 		for (int i = start; i < end; i++) {
 
 			Document doc = searcher.doc(hits[i].doc);
-			String name = doc.get("name");
-			if (name != null) {
+			String subject = doc.get("subject");
+			if (subject != null) {
 				String url = doc.get("url");
-				String subject = doc.get("subject");
 				String preamble = null;
 				if ( i <= tCount ) {
 					preamble = doc.get("preamble");
 				}
-				searchResults.add(new SearchResult(name, url, subject, preamble, hits[i].score));
+				searchResults.add(new SearchResult(subject, url, preamble, hits[i].score));
 				if ( i == tCount ) {
 					Collections.shuffle(searchResults);
 				}
@@ -144,16 +138,16 @@ public class SearchFiles {
 		return searchResults;
 	}
 
-	public void listIndexes() {
-		try {
-			int docs = reader.getDocCount("name");
-			for ( int docID = 0 ; docID < docs; ++docID ) {
-				Fields terms = reader.getTermVectors(docID);
-				int i = 0;
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public synchronized SearchResult randomResult() throws ParseException, IOException {
+		MatchAllDocsQuery query = new MatchAllDocsQuery();
+
+		TopDocs results = searcher.search(query, reader.numDocs());
+		ScoreDoc[] hits = results.scoreDocs;
+		int d = (int)(Math.random()*hits.length);
+		Document doc = searcher.doc(hits[d].doc);
+		String subject = doc.get("subject");
+		String url = doc.get("url");
+		String preamble = doc.get("preamble");
+		return new SearchResult(subject, url, preamble, hits[d].score);
 	}
 }

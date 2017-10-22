@@ -38,7 +38,7 @@ import org.apache.lucene.store.FSDirectory;
  * it with no command-line arguments for usage information.
  */
 public class IndexFiles {
-	public static String indexPath = "c:/users/karln/workspace/sep/src/main/resources/index";
+	public static String indexPath = "c:/users/karln/workspace/iep/src/main/resources/index";
 	IndexWriter writer;
 
 	public IndexFiles() {
@@ -80,18 +80,15 @@ public class IndexFiles {
 
 	}
 
-	public void indexEntry(String name, String url, String subject, String preamble) throws IOException {
+	public void indexEntry(String subject, String url, String preamble) throws IOException {
 		// make a new, empty document
 		Document doc = new Document();
 
-		Field pathField = new TextField("name", name, Field.Store.YES);
-		doc.add(pathField);
+		Field subjectField = new TextField("subject", subject, Field.Store.YES);
+		doc.add(subjectField);
 
 		Field urlField = new StringField("url", url, Field.Store.YES);
 		doc.add(urlField);
-
-		Field subjectField = new StringField("subject", subject, Field.Store.YES);
-		doc.add(subjectField);
 
 		Field preambleField = new TextField("preamble", preamble, Field.Store.YES);
 		doc.add(preambleField);

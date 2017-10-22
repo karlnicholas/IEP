@@ -1,19 +1,18 @@
 package iep.lucene;
 
-import model.ReferTo;
-
-public class SearchResult extends ReferTo {
+public class SearchResult {
+	public String subject;
 	public float score;
 	public String preamble;
-	public String subject;
-	public SearchResult(String name, String url, String subject, String preamble, float score) {
-		super(name, url);
+	public String url;
+	public SearchResult(String subject, String url, String preamble, float score) {
 		this.subject = subject;
-		this.score = score;
+		this.url = url;
 		this.preamble = preamble;
+		this.score = score;
 	}
 	@Override
 	public String toString() {
-		return super.toString()+":"+score+":"+subject;
+		return subject+":"+score;
 	}
 }
