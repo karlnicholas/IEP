@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.csv.CSVFormat;
@@ -16,15 +18,18 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import iep.lucene.IndexFiles;
+import iep.lucene.SearchResult;
 
 public class WriteIndex {
 	private IndexFiles indexFiles;
+	private Map<String, SearchResult> resultMap;
 
 	public static void main(String[] args) throws Exception {
 		new WriteIndex().run();
 	}
 	private void run() throws Exception {
 		indexFiles = new IndexFiles(); 
+		resultMap = new HashMap<>();
 		Path p = Paths.get("c://users/karln/downloads/iep/index.csv");
 		try ( BufferedReader reader = Files.newBufferedReader(p, Charsets.UTF_8)) {
 			CSVParser parser = CSVParser.parse(reader, CSVFormat.DEFAULT);
@@ -35,6 +40,11 @@ public class WriteIndex {
 				}				
 			}
 		}
+		for ( SearchResult sr: resultMap.values()) {
+			indexFiles.indexEntry(sr.subject, sr.url, sr.preamble);
+		}
+		//indexFiles.indexEntry(title, record.get(1), p.text());
+
 		indexFiles.close();
 	}
 	private void parseDoc(Document doc, CSVRecord record) throws Exception {
@@ -48,7 +58,8 @@ public class WriteIndex {
 		} while ( l <= 1 );
 		String title = getTitle(record.get(2));
 		
-		indexFiles.indexEntry(title, record.get(1), p.text());
+		resultMap.put(title, new SearchResult( title, record.get(1), p.text(), 0.0f ));
+		//indexFiles.indexEntry(title, record.get(1), p.text());
 //		if ( title.contains("Ethics")) {
 //			System.out.println(record.get(0)+":"+record.get(1)+":"+record.get(3)+title+":"+p.text());
 //		}
