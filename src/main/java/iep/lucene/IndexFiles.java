@@ -38,7 +38,7 @@ import org.apache.lucene.store.FSDirectory;
  * it with no command-line arguments for usage information.
  */
 public class IndexFiles {
-	public static String indexPath = "c:/users/karln/workspace/iep/src/main/resources/index";
+	public static String indexPath = "c:/users/karln/eclipse-workspace/iep/src/main/resources/index";
 	IndexWriter writer;
 
 	public IndexFiles() {

@@ -14,7 +14,7 @@ public class DoSearch {
 	}
 	public void doSearch() throws ParseException, IOException {
 		SearchFiles searchFiles = new SearchFiles();
-		List<SearchResult> searchResults = searchFiles.query("feminist religion");
+		List<SearchResult> searchResults = searchFiles.query("rescher");
 		if ( searchResults.size() > 0 ) {
 			System.out.println("Found results: " + searchResults.size());
 			for ( SearchResult searchResult: searchResults ) {
